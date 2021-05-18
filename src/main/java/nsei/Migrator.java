@@ -2,6 +2,10 @@ package nsei;
 
 import static com.mongodb.client.model.Sorts.descending;
 
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.ArrayList;
 
 import org.bson.Document;
@@ -16,11 +20,28 @@ import com.mongodb.client.MongoIterable;
 
 public class Migrator {
 	
+	public static final int PORTO = 8080;
+	private final ServerSocket serverSocket;
 	private DredFather father;
+	private boolean running;
 	
-	public Migrator() {
-		updateSensorLimits();
-		migrate();
+	public Migrator() throws IOException {
+		serverSocket = new ServerSocket(PORTO);
+		try {			
+			updateSensorLimits();
+			migrate();
+			startServing();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}finally{
+			try{
+				serverSocket.close();
+			}catch(IOException e){
+				e.printStackTrace();
+			}
+		}
+		System.out.println("Server closing...");
+		
 	}
 	
 	private void updateSensorLimits() {
@@ -61,9 +82,38 @@ public class Migrator {
 		migrate();
 	}
 	
+	private void startServing() throws IOException{
+		while(running){
+			Socket clientSocket = serverSocket.accept();		
+			ButtonListener h = new ButtonListener(this, clientSocket);
+			h.start();
+		}
+	}
+	
+	private void shutdownServer(){
+		new Thread(new Runnable(){
+			@Override
+			public void run(){
+				try {
+					running = false;
+					InetAddress address = InetAddress.getByName(null);
+					Socket killerSocket = new Socket(address, PORTO);
+					killerSocket.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				System.exit(0);
+			}
+		}).start();
+	}
+	
     
 	    public static void main(String[] args) {
-	    	Migrator mig = new Migrator();
+	    	try {
+				Migrator mig = new Migrator();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 	    	
 //	    	ArrayList<String> list = Service.getTable("utilizador");
 //	    	list.forEach(l -> System.out.println(l));
