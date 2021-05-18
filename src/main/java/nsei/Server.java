@@ -35,8 +35,8 @@ public class Server {
 	private void startServing() throws IOException{
 		while(running){
 			Socket clientSocket = serverSocket.accept();		
-			ButtonListener h = new ButtonListener(this, clientSocket);
-			h.start();
+			ButtonListener buttonListener = new ButtonListener(this, clientSocket);
+			buttonListener.start();
 		}
 	}	
 	

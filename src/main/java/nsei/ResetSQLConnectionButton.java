@@ -15,7 +15,6 @@ import javax.swing.JOptionPane;
 public class ResetSQLConnectionButton {
 
 	private Socket socket;
-	private ObjectInputStream in;
 	private ObjectOutputStream out;
 	
 	public ResetSQLConnectionButton() {		
@@ -34,7 +33,6 @@ public class ResetSQLConnectionButton {
 	private void connectToServer() throws UnknownHostException, IOException{
 		socket = new Socket(InetAddress.getByName(null), Server.PORTO);
 		out = new ObjectOutputStream(socket.getOutputStream());
-		in = new ObjectInputStream(socket.getInputStream());
 	}
 	
 	private void sendMessage(Object o){
@@ -51,9 +49,7 @@ public class ResetSQLConnectionButton {
 			if(out != null){
 				out.close();
 			}
-			if(in != null){
-				in.close();
-			}
+
 		}catch(IOException e){
 			e.printStackTrace();
 		}
