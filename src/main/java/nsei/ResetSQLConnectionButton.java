@@ -32,7 +32,7 @@ public class ResetSQLConnectionButton {
 	}
 	
 	private void connectToServer() throws UnknownHostException, IOException{
-		socket = new Socket(InetAddress.getByName(null), Migrator.PORTO);
+		socket = new Socket(InetAddress.getByName(null), Server.PORTO);
 		out = new ObjectOutputStream(socket.getOutputStream());
 		in = new ObjectInputStream(socket.getInputStream());
 	}

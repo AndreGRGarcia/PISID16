@@ -9,14 +9,14 @@ import java.util.concurrent.BlockingQueue;
 
 public class ButtonListener extends Thread {
 	private static final int QUEUES_MAX_CAPACITY = 10;
-	private final Migrator migrator;
+	private final Server server;
 	private final HandlerOut handlerOut;
 	private final BlockingQueue<String> messageQueue;
 	private ObjectInputStream in;
 	private ObjectOutputStream out;
 	
-	public ButtonListener(Migrator server, Socket clientSocket) {
-		this.migrator = server;
+	public ButtonListener(Server server, Socket clientSocket) {
+		this.server = server;
 		handlerOut = new HandlerOut();
 		messageQueue = new ArrayBlockingQueue<>(QUEUES_MAX_CAPACITY);
 		try {
@@ -48,7 +48,7 @@ public class ButtonListener extends Thread {
 	private void processMessage(String message) {
 		switch(message){
 			case "RIP":
-				migrator.resetMigrate();
+				server.resetMigrator();
 		default:
 			throw new IllegalStateException("Impossible message type.");
 		}
