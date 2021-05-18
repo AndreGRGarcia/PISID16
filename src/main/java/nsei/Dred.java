@@ -15,10 +15,51 @@ public class Dred extends Thread {
 	
 	private MongoDatabase database;
 	private MongoCollection<Document> collection;
+	private Boolean running = true;
 	
 	public Dred(MongoDatabase database, MongoCollection<Document> collection) {
 		this.database = database;
 		this.collection = collection;
+	}
+	
+	public void stopRunning() {
+		running = false;
+	}
+	
+	public void migrate(MongoDatabase database, MongoCollection<Document> collection) {
+			
+	    	String lastDate;
+	//    	DBCursor<Document> c = new DBCursor<Document>();
+	    	Bson sort = descending("Data");
+	    	MongoIterable<Document> firstD = collection.find().sort(sort).limit(1);
+	    	Document d1 = firstD.first();
+	    	Service.put(new DBMedicao(d1));
+			lastDate = (String)d1.get("Data");
+			
+			for(;;) {
+				if(running) {										
+		    		Bson findFilter = gt("Data", lastDate);
+		    		MongoIterable<Document> result = collection.find(findFilter);
+		    		String lastDateTemp = "";
+		    		if(result.cursor().hasNext()) {
+		    			for(Document d: result) {
+		    				System.out.println(d);
+		    				Service.put(new DBMedicao(d));
+		    				lastDateTemp = (String)d.get("Data");
+		    			}
+		    			if(!lastDateTemp.isEmpty()) lastDate = lastDateTemp;
+		    		} else {
+		    			try {
+		    				System.out.println("Gonna sleep for a second");
+							sleep(1000);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+		    		}
+				}else {
+		    		break;
+				}
+	    	}   
 	}
 	
 	@Override
@@ -26,35 +67,6 @@ public class Dred extends Thread {
 		migrate(database, collection);
 	}
 	
-	public void migrate(MongoDatabase database, MongoCollection<Document> collection) {
-		
-    	String lastDate;
-//    	DBCursor<Document> c = new DBCursor<Document>();
-    	Bson sort = descending("Data");
-    	MongoIterable<Document> firstD = collection.find().sort(sort).limit(1);
-    	Document d1 = firstD.first();
-    	Service.put(new DBMedicao(d1));
-		lastDate = (String)d1.get("Data");
-		
-		for(;;) {
-    		Bson findFilter = gt("Data", lastDate);
-    		MongoIterable<Document> result = collection.find(findFilter);
-    		String lastDateTemp = "";
-    		if(result.cursor().hasNext()) {
-    			for(Document d: result) {
-    				System.out.println(d);
-    				Service.put(new DBMedicao(d));
-    				lastDateTemp = (String)d.get("Data");
-    			}
-    			if(!lastDateTemp.isEmpty()) lastDate = lastDateTemp;
-    		} else {
-    			try {
-    				System.out.println("Gonna sleep for a second");
-					sleep(1000);
-				} catch (InterruptedException e) {e.printStackTrace();}
-    		}
-    	}
-    
-    }
+	
 	
 }

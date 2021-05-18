@@ -16,6 +16,7 @@ import com.mongodb.client.MongoIterable;
 
 public class Migrator {
 	
+	private DredFather father;
 	
 	public Migrator() {
 		updateSensorLimits();
@@ -34,7 +35,6 @@ public class Migrator {
 		MongoClientURI uri = new MongoClientURI("mongodb://localhost:27017");
     	MongoClient mongoClient = new MongoClient(uri);
     	MongoDatabase database = mongoClient.getDatabase("sid2021");
-    	MongoIterable<String> diogoCandelabros = database.listCollectionNames();
 //    	ArrayList<MongoCollection<Document>> collections = new ArrayList<>();
 //    	collections.add(database.getCollection("sensort1"));
 //    	collections.add(database.getCollection("sensort2"));
@@ -43,28 +43,22 @@ public class Migrator {
 //    	collections.add(database.getCollection("sensorh1"));
 //    	collections.add(database.getCollection("sensorh2"));
     	
-		ArrayList<Dred> dreds = new ArrayList<>();
-		for(String c: diogoCandelabros) {
-			MongoCollection<Document> col = database.getCollection(c);
-			Dred dred = new Dred(database, col);
-			dred.start();
-			dreds.add(dred);
-			System.out.println("Started Dred");
-		}
-		dreds.forEach(d -> {
-			try {
-				d.join();
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		});
+		father = new DredFather(database);
+		father.start();
+		try {
+			father.join();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}   
 		
-    	
     	mongoClient.close();
 	}
 	
 	
+	public void resetMigrate() {
+		father.stopRunning();
+		migrate();
+	}
 	
     
 	    public static void main(String[] args) {
