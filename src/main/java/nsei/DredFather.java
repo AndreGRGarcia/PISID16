@@ -22,8 +22,9 @@ public class DredFather extends Thread{
 	
 	public void stopRunning() {
 		running = false;
-		dreds.forEach (d -> { d.stopRunning(); });
+		dreds.forEach (Dred::stopRunning);
 		dreds.clear();
+
 	}
 	
 	public void makeChildrens() {

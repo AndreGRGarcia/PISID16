@@ -57,6 +57,7 @@ public class Migrator {
 	
 	public void resetMigrate() {
 		father.stopRunning();
+		father.interrupt();
 		migrate();
 	}
 	
