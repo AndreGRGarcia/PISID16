@@ -34,7 +34,7 @@ public class Service {
 			rs = cloudDAO.get(query);
 			try {
 				while(rs.next()) {
-					list.add(new DBSensor("'" + rs.getInt("idsensor") + "', '" +  rs.getString("tipo") + "', '" + rs.getString("limiteinferior") + "', '" + rs.getString("limitesuperior") + "', '" + rs.getString("idzona") + "'"));
+					list.add(new DBSensor("'" + rs.getString("tipo") + "', '" + rs.getString("limiteinferior") + "', '" + rs.getString("limitesuperior") + "', '" + rs.getString("idzona") + "'"));
 				}
 				return list;
 			} catch (SQLException e) {

@@ -16,7 +16,7 @@ public class DBSensor extends DBObject {
 
 	@Override
 	public String getFields() {
-		return "idsensor, tipo, limiteinferior, limitesuperior, idzona";
+		return "tipo, limiteinferior, limitesuperior, idzona";
 	}
 
 
