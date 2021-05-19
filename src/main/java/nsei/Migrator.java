@@ -10,10 +10,13 @@ import com.mongodb.client.MongoDatabase;
 public class Migrator {
 	
 	private DredFather father;
+	private Server server;
 	
-	public Migrator() {			
-		updateSensorLimits();
-		migrate();
+	public Migrator() throws InterruptedException {
+		this.server = new Server(this);
+		server.start();
+//		updateSensorLimits();
+//		migrate();
 	}
 	
 	private void updateSensorLimits() {
@@ -34,17 +37,15 @@ public class Migrator {
 		try {
 			father.join();
 		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}   
-		
-    	mongoClient.close();
+			mongoClient.close();
+		}
 	}
-	
-	
-	public void resetMigrate() {
-		father.stopRunning();
-		father.interrupt();
-		migrate();
-	}	    
-	    
+
+	public void closeApp() {
+		server.interrupt();
+	}
+
+	public void reset() {
+		notify();
+	}
 }

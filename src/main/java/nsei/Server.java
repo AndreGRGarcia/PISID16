@@ -1,51 +1,44 @@
 package nsei;
 
 import java.io.IOException;
+import java.io.InterruptedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class Server {
+public class Server extends Thread {
 
-	public static final int PORTO = 8080;
-	private final ServerSocket serverSocket;
-	private boolean running = true;
+	private final int PORTO = 8585;
+	private ServerSocket server;
+	private Socket socket;
+
 	private Migrator migrator;
-	
-	public Server(Migrator migrator) throws IOException {
-		serverSocket = new ServerSocket(PORTO);
+
+	public Server(Migrator migrator) {
 		this.migrator = migrator;
+	}
+
+	@Override
+	public void run() {
 		try {
-			startServing();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}finally{
-			try{
-				serverSocket.close();
-			}catch(IOException e){
-				e.printStackTrace();
+			server = new ServerSocket(PORTO);
+			while (true) {
+				socket = server.accept();
+				System.out.println("RESET CONNECTIONS BUTTON PRESSED");
+//				migrator.reset();
 			}
 		}
-		System.out.println("Server closing...");
-	}
-	
-	public void resetMigrator() {
-		migrator.resetMigrate();
-	}
-	
-	private void startServing() throws IOException{
-		while(running){
-			Socket clientSocket = serverSocket.accept();		
-			ButtonListener buttonListener = new ButtonListener(this, clientSocket);
-			buttonListener.start();
+		catch (IOException e) {
+			e.printStackTrace();
 		}
-	}	
-	
-	 public static void main(String[] args) {
+		finally {
 			try {
-				new Server(new Migrator());
+				socket.close();
+				server.close();
+				System.out.println("SERVIDOR FECHADO");
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-	 }
+		}
+	}
 	
 }

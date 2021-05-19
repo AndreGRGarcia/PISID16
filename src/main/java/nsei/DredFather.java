@@ -17,17 +17,16 @@ public class DredFather extends Thread{
 	
 	public DredFather(MongoDatabase database) {
 		this.database = database;
-		iterator = database.listCollectionNames();
-	}	
-	
-	public void stopRunning() {
-		running = false;
-		dreds.forEach (Dred::stopRunning);
-		dreds.clear();
-
 	}
 	
-	public void makeChildrens() {
+	public void resetDreds() {
+		dreds.forEach (Dred::stopRunning);
+		dreds.clear();
+		makeChildren();
+	}
+	
+	public void makeChildren() {
+		iterator = database.listCollectionNames();
 		for(String c: iterator) {
 			MongoCollection<Document> col = database.getCollection(c);
 			Dred dred = new Dred(database, col);
@@ -35,19 +34,18 @@ public class DredFather extends Thread{
 			dreds.add(dred);
 			System.out.println("Started Dred");
 		}
-		dreds.forEach(d -> {
-			try {
-				d.join();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		});
 	}
 	
 	@Override
 	public void run() {
-		if(running)
-			makeChildrens();
+		makeChildren();
+		while (true) {
+			try{
+				this.wait();
+				resetDreds();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
 	}
-	
 }
